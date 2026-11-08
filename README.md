@@ -19,7 +19,7 @@
 
 ![Backend](https://img.shields.io/badge/backend-PHP%207.4%2B-777bb4)
 
-![License](https://img.shields.io/badge/license-MIT-green)
+![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue)
 
 ```
         TT
@@ -317,6 +317,17 @@ monkeydo bin/TTCoin.prg instinct2x
 
 ## License
 
-以 [MIT](LICENSE) 许可证发布。版权归 `TTCoin contributors` 所有——这是一个通用的署名，任何后续维护者都可以在此基础上继续分发。
+以 [PolyForm Noncommercial License 1.0.0](LICENSE) 发布，**仅限非商业用途**。版权归 `TTCoin contributors` 所有。
 
-简言之：可以随意使用、修改、分发（包括商用），唯需在副本中保留原始版权与许可声明；软件按"现状"提供，不含任何担保。
+| 可以 | 不可以 |
+| --- | --- |
+| 个人学习、研究、自用、改着玩 | **任何商业用途**：卖给客户、随硬件捆绑销售、公司内部业务系统、做成付费服务或订阅 |
+| 学校、慈善、政府、公共研究等非商业组织使用 | 拿本项目提供有偿技术支持、代部署或托管服务 |
+| 修改、二次开发、分发副本（须保留许可证与版权声明，并注明改动） | 删掉版权与许可证声明后当自己的作品发布 |
+
+一句话区分：**能看到源码 ≠ 可以商用**。这是 source-available，不是 OSI 认可的开源许可证。
+
+需要商用授权，到 [Issues](https://github.com/hh1949tt/TTCoin_Widget/issues) 说明用途即可。软件按"现状"提供，不含任何担保。
+
+This project is licensed under the PolyForm Noncommercial License 1.0.0.
+**Commercial use of any kind requires a separate written license.**

@@ -120,7 +120,7 @@ function onReceive(
 
 - `README.md` —— 项目说明、部署、接口约定、排错；
 - `.gitignore` —— 重点排除 `bin/`（其中的 `TTCoin.prg.debug.xml` 会写入**本机绝对路径与源码行号映射**，属于不该公开的本地信息）、`*.der`、缓存文件；
-- `LICENSE` —— **MIT**，版权行署名 `TTCoin contributors`（通用署名，后续维护者可继续分发，不必追着原作者改授权）。
+- `LICENSE` —— **PolyForm Noncommercial 1.0.0**，版权行署名 `TTCoin contributors`。非商业可自由使用、修改、分发；**商用须另行授权**。
 
 ### 4. ✅ 硬编码索引（已修复）
 
@@ -473,7 +473,7 @@ $prices[$item['symbol']] = $display;
 - [x] 布局坐标改为按屏幕比例缩放，176×176 上逐像素一致（第 5 条）
 - [ ] 确认 `git status` 里没有 `bin/`、`*.der`、`cache/coin.json`
 - [ ] 确认 `cache/.htaccess` 与 `api/.htaccess` 已随提交进入仓库（`.gitignore` 里有 `!cache/.htaccess` 例外）
-- [x] 补 `LICENSE`（MIT，署名 TTCoin contributors）
+- [x] 补 `LICENSE`（PolyForm Noncommercial 1.0.0，署名 TTCoin contributors；1.0.2 由 MIT 收紧为禁止商用）
 - [ ] 加真机截图到 `docs/screenshot.png`（README 已预留注释位）
 - [ ] 仓库 About 填一句描述 + Topics：`garmin` `connect-iq` `monkey-c` `crypto` `widget`
 
