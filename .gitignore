@@ -1,0 +1,32 @@
+# ---- Garmin Connect IQ 构建产物 ----
+bin/
+*.prg
+*.prg.debug.xml
+*.mir
+*.mbc
+*.iq
+*.barrel
+
+# ---- 签名密钥（绝对不要提交）----
+*.der
+*.pem
+developer_key*
+*.key
+
+# ---- 服务端缓存与日志 ----
+cache/*
+!cache/.htaccess
+api/coin_cache.json
+*.log
+
+# ---- 编辑器 / 系统 ----
+.vscode/settings.json
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+
+# ---- 依赖 ----
+node_modules/
+__pycache__/
