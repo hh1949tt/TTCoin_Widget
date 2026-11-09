@@ -4,7 +4,7 @@
 
 | 项目 | 版本 | 发布日期 | 应用 id | 发布形态 | 状态 |
 | --- | --- | --- | --- | --- | --- |
-| TTCoin_Widget | **1.0.2** | 2026-11-08 | `e8dab0f9-d9a8-4ef5-8bab-fd05bcf135f5` | 侧载 `.prg` / Connect IQ Store（Widgets 分类） | **构建通过 · 模拟器验收通过 · 真机待确认** |
+| TTCoin_Widget | **1.0.3** | 2026-11-09 | `e8dab0f9-d9a8-4ef5-8bab-fd05bcf135f5` | 侧载 `.prg` / Connect IQ Store（Widgets 分类） | **构建通过 · 模拟器验收通过 · 真机待确认** |
 
 前置依赖：`TTCoin_API` 已上线，且 `TTCOIN_WIDGET_LIMIT` 为开启（默认开）。
 
@@ -14,7 +14,7 @@
 
 | 项 | 值 |
 | --- | --- |
-| 版本 | 1.0.2 |
+| 版本 | 1.0.3（1.0.2 许可证改为 PolyForm Noncommercial；**1.0.3 小工具页新增顶部时钟**） |
 | 类型 | `widget`（小工具环入口，不是应用列表） |
 | 手表上的名字 | **TTCoin Widget**（与 APP 的 `TTCoin` 刻意区分） |
 | 入口类 | `TTCoinApp`（`AppBase.getInitialView()` → `TTCoinView`） |
@@ -166,3 +166,4 @@ grep -o 'id="[0-9a-f-]\{36\}"' manifest.xml
 | 2026-11-08 | 1.0.0 | 独立 app id（不再与 APP 冲突）；`type=widget` 触发服务端 top3；行宽按八边形剖面逐行取、文本+箭头整组居中；首行下移到 y=75 避开灯孔外圈 |
 | 2026-11-08 | 1.0.1 | `manifest` 语言声明改为 `eng` + `zhs`（与 APP 保持一致，说明两种语言环境可用）；无代码与资源改动，产物字节数不变 |
 | 2026-11-08 | 1.0.2 | 许可证由 MIT 改为 **PolyForm Noncommercial License 1.0.0**：仅限非商业用途，商用须另行取得书面授权；`LICENSE` 重写并附 `Required Notice`，README 增补「可以 / 不可以」对照；**无代码与资源改动，`.prg` 无需重编** |
+| 2026-11-09 | 1.0.3 | 副标题上方新增当前时间（24 小时制，如 `14:25`），与 `- Coin -` 同轴居中（`CLOCK_UP=76`，`FONT_SMALL`）；走时独立 1 秒定时器、换分钟才重绘、`onHide` 停表；无数据（`No Net` / `No Data`）时时钟照常显示 |
