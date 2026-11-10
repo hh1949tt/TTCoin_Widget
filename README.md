@@ -6,7 +6,7 @@
 > 接口地址可在手机端 Widget 设置里改（`properties.xml` 的 `apiUrl`，默认值在
 > `source/TTCoinView.mc` 的 `DEFAULT_API`），每行行情右侧带 24h 涨跌方向
 > 箭头（手绘三角，因为内置字体没有 ↑/↓/▲/▼ 字形），缓存结构升级到 v3；
-> 请求带上设备唯一标识 `?uid=`（`uniqueIdentifier`，与 Watch App 版一致），
+> 请求带上设备标识 `?id=`（默认自动生成 `TC` + `uniqueIdentifier`，与表盘 / Watch App 版一致），
 > 并额外携带形态标记 `?type=widget`（Watch App 版发 `type=app`），服务端日志据此区分两种形态。
 
 ![Platform](https://img.shields.io/badge/platform-Garmin%20Connect%20IQ-000000)
@@ -110,7 +110,7 @@ sequenceDiagram
 
     W->>W: initialize() → loadCache()（先画上次的价格）
     W->>W: onShow() → startTimer() + fetchPrice()
-    W->>P: GET /coin.php?uid=…&type=widget
+    W->>P: GET /coin.php?id=…&type=widget
     P->>P: 读本地缓存（TTL 10s，存的是完整列表）
     alt 缓存命中
         P-->>W: 200 + 前 3 项（按 type 在出口裁剪）
@@ -234,7 +234,7 @@ monkeydo bin/TTCoin.prg instinct2x
 
 ## 服务端（TTCoin_API）
 
-服务端代码在同级目录 **`TTCoin_API`**（三个形态共用同一份，本仓库不再内嵌 `api/`）。部署方式、接口约定（`?uid=` / `?type=` 参数、请求日志格式、小数位规则、502 降级行为）见 [`../TTCoin_API/README.md`](https://github.com/hh1949tt/TTCoin_API/blob/main/README.md)。
+服务端代码在同级目录 **`TTCoin_API`**（三个形态共用同一份，本仓库不再内嵌 `api/`）。部署方式、接口约定（`?id=` / `?type=` 参数、请求日志格式、小数位规则、502 降级行为）见 [`../TTCoin_API/README.md`](https://github.com/hh1949tt/TTCoin_API/blob/main/README.md)。
 
 > **本版只拿 3 项行情。** 请求带 `type=widget`，服务端默认只回候选池前 3 项（`TTCOIN_WIDGET_LIMIT` 开关，见 API README「Widget 只回前 3 项」）——一屏 3 行，多给的也翻不到。缓存里仍是完整列表，Watch App 版照旧拿全部；想让它也拿全部，把开关关掉即可。
 
