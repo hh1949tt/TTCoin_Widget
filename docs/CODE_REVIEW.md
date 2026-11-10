@@ -1,3 +1,7 @@
+> **说明**：本文是发布前的代码评审存档，记录的是**当时**的代码状态与结论。
+> 发布版已把默认接口地址改为占位符 `https://your-domain.example/coin.php`（属性 `apiUrl`，手机端可改），
+> 因此文中「私人域名硬编码」一项已关闭；其余条目的取舍思路仍然适用。
+
 # 代码审查与发布前 Checklist
 
 审查对象：`TTCoin` 全部源码（Monkey C + PHP）。
@@ -7,7 +11,7 @@
 
 | # | 位置 | 问题 | 严重度 |
 | --- | --- | --- | --- |
-| 1 | `TTCoinView.mc:10` | 硬编码接口域名（发布版已改为占位地址） | 🔴 高 |
+| 1 | `TTCoinView.mc:10` | 硬编码作者私人接口域名 | 🔴 高 |
 | 2 | `TTCoinView.mc:193-227` | `onReceive` 类型标注与实际 Array 数据不符 | ✅ 已修复 |
 | 3 | 仓库根目录 | 缺少 `README` / `.gitignore` / `LICENSE` | ✅ 已修复 |
 | 4 | `TTCoinView.mc:107-141` | 硬编码数组索引，返回条数不足即崩溃 | ✅ 已修复 |
@@ -31,7 +35,7 @@
 
 ```monkey-c
 // TTCoinView.mc:10
-const PRICE_API = "https://api.example.com/coin.php";
+const PRICE_API = "https://your-domain.example/coin.php";
 ```
 
 公开仓库后，任何人下载代码都会打到你的服务器上：带宽、流量、被滥用的风险都由你承担，而对方一旦断网或你的域名过期，会认为"这个插件是坏的"。
@@ -484,7 +488,7 @@ git add .
 git status          # ← 先看这里，确认没有敏感文件
 git commit -m "feat: TTCoin widget for Garmin Instinct 2X"
 git branch -M main
-git remote add origin https://github.com/<your-name>/TTCoin.git
+git remote add origin https://github.com/hh1949tt/TTCoin_Widget.git
 git push -u origin main
 ```
 

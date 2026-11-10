@@ -1,5 +1,6 @@
 # ---- Garmin Connect IQ 构建产物 ----
 bin/
+dist/
 *.prg
 *.prg.debug.xml
 *.mir

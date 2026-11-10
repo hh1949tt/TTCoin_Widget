@@ -3,8 +3,8 @@
 > 在 Garmin Instinct 2X 上随手看一眼币价。一个只有 100 多行的 Connect IQ Widget。
 
 > **注**：本目录是 Widget 形态的独立版本（Watch App 版在 `TTCoin_APP`）。
-> 相对早期备份的改动：接口改到 `/ttcoin/api/coin.php`（地址是 `source/TTCoinView.mc` 里的
-> `PRICE_API` 常量），每行行情右侧增加 24h 涨跌方向
+> 接口地址可在手机端 Widget 设置里改（`properties.xml` 的 `apiUrl`，默认值在
+> `source/TTCoinView.mc` 的 `DEFAULT_API`），每行行情右侧带 24h 涨跌方向
 > 箭头（手绘三角，因为内置字体没有 ↑/↓/▲/▼ 字形），缓存结构升级到 v3；
 > 请求带上设备唯一标识 `?uid=`（`uniqueIdentifier`，与 Watch App 版一致），
 > 并额外携带形态标记 `?type=widget`（Watch App 版发 `type=app`），服务端日志据此区分两种形态。
@@ -20,6 +20,29 @@
 ![Backend](https://img.shields.io/badge/backend-PHP%207.4%2B-777bb4)
 
 ![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue)
+
+![截图](screenshots/widget-main.png)
+
+上方就是手表上的实际画面（176×176 原图）：时间、三行行情（币种 / 价格 / 涨跌箭头），
+币种多于三行时每 8 秒翻页。
+
+> **装上表之前**：接口地址默认是占位地址 `https://your-domain.example/coin.php`。
+> 先用 [`TTCoin_API`](https://github.com/hh1949tt/TTCoin_API/blob/main/README.md) 部署自己的中转接口，再按
+> [配置接口地址](#2-配置接口地址) 改成你自己的地址，否则只会显示 `No Net`。
+>
+> **许可**：PolyForm Noncommercial 1.0.0 —— **仅限非商业用途**，详见 [LICENSE](LICENSE)。
+
+### 四个仓库
+
+| 形态 | 仓库 |
+| --- | --- |
+| 表盘（Watch Face） | <https://github.com/hh1949tt/TTCoin_WF> |
+| Watch App | <https://github.com/hh1949tt/TTCoin_APP> |
+| Widget | <https://github.com/hh1949tt/TTCoin_Widget> |
+| 服务端中转 | <https://github.com/hh1949tt/TTCoin_API> |
+
+三个表端项目共用同一套接口约定（`[{symbol,base,price,change}]`），
+服务端可任选 PHP 或 Cloudflare Worker 版。
 
 ```
         TT
@@ -59,7 +82,7 @@
 1. Garmin 设备端只支持 HTTPS + 标准 JSON，自己中转一层可以把 Binance 的原始响应裁剪成极小的 3 条记录（约 100 字节），省电省流量；
 2. 手表端 TLS 握手机制、DNS 和证书链对目标站点的兼容性有限，中转层可以把不稳定性挡在服务端。
 
-> ⚠️ **重要**：仓库里的 `source/TTCoinView.mc` 中 `PRICE_API` 是占位地址 `https://api.example.com/...`，**直接编译装上不会有数据**。请按 [后端部署](#后端部署) 自建一份，然后改成你自己的地址。
+> ⚠️ **重要**：仓库里的默认接口地址是**占位符** `https://your-domain.example/coin.php`，直接装上是拿不到行情的。请按 [后端部署](#后端部署) 自建一份中转接口，再把 `apiUrl` 改成你自己的地址。
 
 ## 功能特性
 
@@ -109,7 +132,7 @@ sequenceDiagram
 | ---------------------- | ----------------------------------------------- |
 | `source/TTCoinApp.mc`  | `AppBase` 入口，`getInitialView()` 返回 `TTCoinView` |
 | `source/TTCoinView.mc` | 全部业务：发请求、本地缓存、状态机、定时器、绘制                        |
-| `https://github.com/hh1949tt/TTCoin_API/blob/main/coin.php` | 手表调用的主接口，带缓存与降级（服务端独立目录）                 |
+| `../TTCoin_API/coin.php` | 手表调用的主接口，带缓存与降级（服务端独立目录）                 |
 
 ## 目录结构
 
@@ -144,7 +167,7 @@ TTCoin/
 - [Visual Studio Code](https://code.visualstudio.com/) + 官方扩展 **Monkey C**
 - 一个 Garmin 开发者签名密钥（`.der`），用于真机安装
 
-**服务端**（详见 [TTCoin_API 的 README](https://github.com/hh1949tt/TTCoin_API#readme)）
+**服务端**（详见 [`../TTCoin_API/README.md`](https://github.com/hh1949tt/TTCoin_API/blob/main/README.md)）
 
 - PHP 7.4+，启用 `curl` 与 `json` 扩展；任意支持 HTTPS 的 Web 服务器
 
@@ -153,18 +176,41 @@ TTCoin/
 ### 1. 克隆并打开
 
 ```bash
-git clone https://github.com/<your-name>/TTCoin.git
+git clone https://github.com/hh1949tt/TTCoin_Widget.git
 cd TTCoin
 code .
 ```
 
 ### 2. 配置接口地址
 
-编辑 `source/TTCoinView.mc` 文件头部的常量：
+两个位置，改哪个都行：
 
-```monkey-c
-const PRICE_API = "https://your-domain.com/coin.php";
+**① 编译默认值**：编辑 `resources/properties.xml`：
+
+```xml
+<property id="apiUrl" type="string">https://your-domain.example/coin.php</property>
 ```
+
+**② 手机端设置（商店 / Beta App 安装的版本）**：
+
+Garmin Connect → 设备 → 小组件 → TTCoin Widget → 设置 → 「行情接口地址」。
+
+地址校验在 `apiEndpoint()` 里：不是 `https://` 开头或长度不足，一律回退到
+`TTCoinView.DEFAULT_API`（`makeWebRequest` 在多数设备上只接受 HTTPS）。
+
+### 2.5 行情配置 ID（自动生成，可选手动覆盖）
+
+`resources/properties.xml` 的 `faceId`（手机端设置里显示为「行情配置 ID」，
+仅商店 / Beta App 安装的版本可见，限字母数字、最长 32）。**留空时客户端
+自动生成设备 ID**：`TC` + `System.getDeviceSettings().uniqueIdentifier`
+（限长 32，同设备恒定、卸载重装不变），随请求带 `?id=`，不用再手动抄 ID。
+服务端按 `FACE_IDS` 里登记的覆盖默认行情（滚屏 / 固定 / 顺序 / 条数 /
+**主币种**），没登记的 id 走默认一套（默认币种）。想查自己设备的 id：看
+服务端响应头 `X-TTCoin-Face-Id`，或服务端访问日志里的 `?id=`。手动填了
+非空 id 则优先用手动的——**表盘（TTCoin_WF）/ Watch App / 本 Widget 三个
+客户端逻辑一致**：同设备的自动 id 相同语义，登记后三端看到同一套行情，
+各 id 的币种也可以不一致。配置格式见
+[`../TTCoin_API/README.md`](https://github.com/hh1949tt/TTCoin_API/blob/main/README.md)。
 
 ### 3. 编译
 
@@ -188,7 +234,7 @@ monkeydo bin/TTCoin.prg instinct2x
 
 ## 服务端（TTCoin_API）
 
-服务端代码在同级目录 **`https://github.com/hh1949tt/TTCoin_API`**（三个形态共用同一份，本仓库不再内嵌 `api/`）。部署方式、接口约定（`?uid=` / `?type=` 参数、请求日志格式、小数位规则、502 降级行为）见 [TTCoin_API 的 README](https://github.com/hh1949tt/TTCoin_API#readme)。
+服务端代码在同级目录 **`TTCoin_API`**（三个形态共用同一份，本仓库不再内嵌 `api/`）。部署方式、接口约定（`?uid=` / `?type=` 参数、请求日志格式、小数位规则、502 降级行为）见 [`../TTCoin_API/README.md`](https://github.com/hh1949tt/TTCoin_API/blob/main/README.md)。
 
 > **本版只拿 3 项行情。** 请求带 `type=widget`，服务端默认只回候选池前 3 项（`TTCOIN_WIDGET_LIMIT` 开关，见 API README「Widget 只回前 3 项」）——一屏 3 行，多给的也翻不到。缓存里仍是完整列表，Watch App 版照旧拿全部；想让它也拿全部，把开关关掉即可。
 
@@ -196,7 +242,7 @@ monkeydo bin/TTCoin.prg instinct2x
 
 | 想改什么  | 改哪里                                                                 | 说明                                    |
 | ----- | ------------------------------------------------------------------- | ------------------------------------- |
-| 接口地址  | `source/TTCoinView.mc:10` `PRICE_API`                               | 必须是 HTTPS                             |
+| 接口地址  | `resources/properties.xml` 的 `apiUrl`（默认值 `TTCoinView.DEFAULT_API`） | 必须是 HTTPS                             |
 | 轮播间隔  | `source/TTCoinView.mc` `PAGE_MS`                                     | 单位毫秒，默认 8000；每页停留时长                   |
 | 抓取周期  | `source/TTCoinView.mc` `FETCH_TICKS`                                 | 每 N 拍抓一次行情（8 拍 × 8s ≈ 64s）            |
 | 每屏行数  | `source/TTCoinView.mc` `PAGE_ROWS`                                   | 默认 3；改大要同步缩小 `ROW_PITCH` 或字号，否则会画出八边形 |
@@ -237,7 +283,7 @@ monkeydo bin/TTCoin.prg instinct2x
 
 按顺序排查：
 
-1. `PRICE_API` 是否为 HTTPS，且域名证书有效（自签证书不行）；
+1. `apiUrl` 是否为 HTTPS、域名证书是否有效（自签证书不行）；
 2. `manifest.xml` 是否包含 `Communications` 权限（本仓库已含）；
 3. 手机端 Garmin Connect 是否在线——**手表的网络请求实际上经由手机转发**，手机断网则必然失败；
 4. 用手机浏览器打开同一个 URL，确认返回的是 JSON 而不是 PHP 源码或 500 页面。
@@ -301,8 +347,8 @@ The watch never talks to Binance directly — it calls a small PHP relay (`coin.
 **Quick start**
 
 ```bash
-git clone https://github.com/<your-name>/TTCoin.git
-# 1. edit PRICE_API in source/TTCoinView.mc → your own HTTPS endpoint
+git clone https://github.com/hh1949tt/TTCoin_Widget.git
+# 1. set apiUrl in resources/properties.xml (or in Garmin Connect widget settings) to your own HTTPS endpoint
 # 2. build & install
 monkeyc -f monkey.jungle -d instinct2x -o bin/TTCoin.prg -y /path/to/developer_key.der
 monkeydo bin/TTCoin.prg instinct2x

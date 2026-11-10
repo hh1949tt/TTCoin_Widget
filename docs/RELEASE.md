@@ -23,7 +23,7 @@
 | 权限 | `Communications` |
 | 语言 | `eng` + `zhs`（无需要翻译的文案，`zhs` 回落基础语言；见 §2.1） |
 | 产物 | `bin/TTCoin_Widget.prg`（98,892 字节，2026-11-08 12:20 构建） |
-| 接口地址 | `source/TTCoinView.mc` 的 `PRICE_API`（**编译期常量，无属性、无手机设置**） |
+| 接口地址 | `resources/properties.xml` 的 `apiUrl`（默认值 `TTCoinView.DEFAULT_API`；手机端 Widget 设置里也能改） |
 
 **与 APP 版的边界**：id 必须不同（`e8dab0f9-…` vs `1d087cf1-…`），否则同表只能存在一个。本项目是 widget，装它不会出现在应用列表；APP 是 watch-app，装它不会出现在小工具环——**两者不是替代关系**。
 
@@ -71,11 +71,11 @@
 
 ```bash
 monkeyc.bat -f monkey.jungle -o bin/TTCoin_Widget.prg \
-  -y <path-to-developer_key> \
+  -y path/to/developer_key \
   -d instinct2x -w -l 2
 ```
 
-换接口地址：改 `source/TTCoinView.mc` 的 `PRICE_API` 后重编译（本项目没有 `properties.xml`，改不了手机端）。
+换接口地址：改 `resources/properties.xml` 的 `apiUrl` 后重编译，或在手机端 Widget 设置里直接改（无需重装）。
 
 ## 5. 发布步骤
 
@@ -148,7 +148,7 @@ grep -o 'id="[0-9a-f-]\{36\}"' manifest.xml
 | 编号 | 风险 | 影响 | 现状与缓解 |
 | --- | --- | --- | --- |
 | R1 | 首行箭头修复的回归风险 | 调宽后可能挤掉箭头或截断末位小数 | 模拟器实测三行箭头齐全、末位完整；真机仍需看一眼 |
-| R2 | `PRICE_API` 硬编码 | 换服务端必须重编译、重装 | 属设计选择（widget 无设置页）；文档已明示；仓库内为占位地址，上线前必须改成自己的 |
+| R2 | 默认地址是占位符 | 装上后不改地址拿不到行情 | 已补 `apiUrl` 属性 + 手机端设置项，README 首屏提示先自建接口 |
 | R3 | 与服务端条数不一致 | 改 `TOP_N` 后 widget 仍只画 3 行 | 只浪费流量，不报错；改条数时两边一起看 |
 | R4 | 服务端开关被关 | widget 拿到全量，解析变慢 | 服务端 `TTCOIN_WIDGET_LIMIT` 默认开；日志第 6 列 `top3` 可验证 |
 | R5 | 与 APP 同装时日志混淆 | 同一 uid 两种 type | 按 `type` 列区分，这正是加该参数的原因 |

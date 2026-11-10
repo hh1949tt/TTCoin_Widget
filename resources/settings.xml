@@ -1,0 +1,18 @@
+<settings>
+    <!--
+        Garmin Connect 手机端的 Widget 设置界面。
+        propertyKey 的 @Properties. 前缀后必须与 properties.xml 的 id 完全一致。
+    -->
+    <setting title="行情接口地址" propertyKey="@Properties.apiUrl">
+        <settingConfig
+            type="alphaNumeric"
+            maxLength="200"
+            errorMessage="@Strings.ApiUrlInvalid"/>
+    </setting>
+    <setting title="行情配置 ID（留空自动生成）" propertyKey="@Properties.faceId">
+        <settingConfig
+            type="alphaNumeric"
+            maxLength="32"
+            errorMessage="@Strings.FaceIdInvalid"/>
+    </setting>
+</settings>

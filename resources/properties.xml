@@ -1,0 +1,19 @@
+<resources>
+    <!--
+        两个属性都可以在手机端 Garmin Connect → 设备 → 小组件 → 设置里改，
+        与手表端读的是同一份值。
+
+        apiUrl  行情接口地址。必须 https:// 开头；非法值回落到
+                TTCoinView.DEFAULT_API。部署 TTCoin_API（或 Cloudflare Worker
+                版）后填你自己的地址，例如 https://your-domain.example/coin.php
+        faceId  行情配置 ID。服务端按 FACE_IDS 里登记的覆盖默认行情
+                （mode/order/fixed/topN/coin，写哪个覆盖哪个）。
+                表盘（TTCoin_WF）/ Watch App（TTCoin_APP）/ 本 Widget 三个客户端
+                填同一个 id，三端看到同一套行情（币种也可以各 id 不一致）；
+                留空 = 走服务端默认一套（默认币种）。见 TTCoin_API/config.example.php。
+    -->
+    <properties>
+        <property id="apiUrl" type="string">https://your-domain.example/coin.php</property>
+        <property id="faceId" type="string"></property>
+    </properties>
+</resources>

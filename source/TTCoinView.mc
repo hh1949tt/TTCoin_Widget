@@ -9,9 +9,17 @@ using Toybox.Lang;
 
 class TTCoinView extends WatchUi.View {
 
-    // 与 Watch App 版共用同一个接口（老地址 /coin.php 是旧版，不下发 change
-    // 字段，画不了涨跌箭头）
-    const PRICE_API = "https://api.example.com/ttcoin/api/coin.php";
+    // 行情接口地址：部署 TTCoin_API（或 Cloudflare Worker 版）后，把域名换成
+    // 你自己的。也可在手机端 Garmin Connect 的 Widget 设置里改（属性 apiUrl）——
+    // 这里只是兜底默认值，手机端没填或填了非法值时用它，见 apiEndpoint()。
+    // 与 Watch App 版共用同一套接口约定（老地址 /coin.php 是旧版，不下发 change
+    // 字段，画不了涨跌箭头）。
+    const DEFAULT_API = "https://your-domain.example/coin.php";
+
+    // 行情配置 ID（faceId）的合法字符白名单：数字 + 大小写字母。
+    // configId() 用 find() 逐字符比对——不用 String 下标取 Char，
+    // 避开容器访问的编译警告（与表盘版 / APP 版的做法一致）。
+    const ID_WHITE = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
     const PAGE_ROWS = 3;     // 一屏显示几行行情
     const PAGE_MS = 8000;    // 轮播间隔：币种超过一屏时每页停留时长
@@ -584,12 +592,138 @@ class TTCoinView extends WatchUi.View {
         // 应用形态标记：服务端日志里区分同一块表上的 Widget 版与 APP 版
         params.put("type", "widget");
 
+        // 行情配置 ID：服务端按 FACE_IDS 里登记的覆盖默认行情
+        // （mode/order/fixed/topN/coin）。手机端填了 faceId 就用手动的；
+        // 没填自动生成设备 ID（TC + uniqueIdentifier），三端同设备自动 ID 一致，
+        // 登记后同一套行情。取不到才不带，服务端当可选值处理。
+        var faceId = configId();
+
+        if (faceId != null) {
+            params.put("id", faceId);
+        }
+
         Communications.makeWebRequest(
-            PRICE_API,
+            apiEndpoint(),
             params,
             requestOptions,
             method(:onReceive)
         );
+    }
+
+    // 接口地址：优先用手机端 Widget 设置里的 apiUrl（必须是 https:// 开头、
+    // 长度合理），否则回落到 DEFAULT_API。校验规则与 APP 版 apiEndpoint() 一致。
+    function apiEndpoint() as Lang.String {
+
+        var url = null;
+
+        try {
+            url = Application.Properties.getValue("apiUrl");
+        } catch (e) {
+            url = null;                       // 资源里没有这个属性时别抛出去
+        }
+
+        if (!(url instanceof Lang.String)) {
+            return DEFAULT_API;
+        }
+
+        var text = url as Lang.String;
+
+        if (text.length() < 12) {
+            return DEFAULT_API;
+        }
+
+        var at = text.find("https://");
+
+        if (!(at instanceof Lang.Number) || (at as Lang.Number) != 0) {
+            return DEFAULT_API;
+        }
+
+        return text;
+    }
+
+    // 行情配置 ID：
+    //   1. 手机端设置里填了 faceId（清洗后非空）→ 用手动的；
+    //   2. 没填 → 自动生成设备 ID（autoId()），不用再手动抄 ID。
+    function configId() as Lang.String? {
+
+        var raw = null;
+
+        try {
+            raw = Application.Properties.getValue("faceId");
+        } catch (e) {
+            raw = null;
+        }
+
+        if (!(raw instanceof Lang.String)) {
+            return null;
+        }
+
+        var text = raw as Lang.String;
+        var clean = "";
+
+        for (var i = 0; i < text.length() && clean.length() < 32; i++) {
+
+            var c = text.substring(i, i + 1);
+
+            // 白名单串里能找到这个字符（find 命中）才算合法：
+            // 不用 String 下标取 Char，避开容器访问类型推断的编译警告。
+            if (ID_WHITE.find(c) != null) {
+                clean += c;
+            }
+        }
+
+        return clean.length() > 0 ? clean : autoId();
+    }
+
+    // 自动生成的设备 ID："TC" + System.getDeviceSettings().uniqueIdentifier。
+    // uniqueIdentifier 同设备 + 本应用恒定、卸载重装不变，天然适合当设备唯一标识；
+    // 加 TC 前缀和手动填的 ID 区分开。后端 TTCOIN_FACE_IDS 登记了这个 ID 才覆盖
+    // 行情，没登记就回退默认配置，所以自动生成对老后端零影响。
+    // uniqueIdentifier 取不到（个别固件 / 模拟器）：首次随机生成 8 位十六进制
+    // 存进 Application.Storage，之后每次启动读同一份，保证"同设备恒定"。
+    function autoId() as Lang.String? {
+
+        var base = deviceUid();
+
+        if (base == null) {
+            // uniqueIdentifier 取不到（个别固件 / 模拟器）：首次随机生成 8 位
+            // 十六进制存进 Application.Storage，之后每次启动读同一份。
+            var stored = null;
+
+            try {
+                stored = Application.Storage.getValue("autoId");
+            } catch (e) {
+                stored = null;
+            }
+
+            if (stored instanceof Lang.String && (stored as Lang.String).length() > 0) {
+                base = stored as Lang.String;
+            } else {
+                var gen = "";
+                var chars = "0123456789ABCDEF";
+
+                Math.srand(Time.now().value());
+
+                for (var i = 0; i < 8; i++) {
+                    var r = Math.rand() % 16;
+                    gen += chars.substring(r, r + 1);
+                }
+
+                try {
+                    Application.Storage.setValue("autoId", gen);
+                } catch (e) {
+                    // 存不进去也照用：这次会话内恒定，下次启动再重新生成
+                }
+
+                base = gen;
+            }
+        }
+
+        // 限长 32：与后端 ttcoin_face_config 的截断规则一致，
+        // 保证客户端发出的 id 和后端 TTCOIN_FACE_IDS 的登记键完全一致。
+        var id = "TC" + base;
+
+        return id.length() > 32 ? id.substring(0, 32) : id;
     }
 
     // System.getDeviceSettings().uniqueIdentifier（API 2.4.1+）：

@@ -2,4 +2,8 @@
     <!-- 与 TTCoin_APP 的 AppName 必须有区别，否则手表应用列表 / 小组件
          列表里两个都叫 "TTCoin"，装在同一台表上分不清哪个是哪个。 -->
     <string id="AppName">TTCoin Widget</string>
+    <!-- 行情配置 ID 的校验提示（settings.xml 引用） -->
+    <string id="FaceIdInvalid">只能填字母和数字，最长 32 个字符</string>
+    <!-- 接口地址的校验提示（settings.xml 引用） -->
+    <string id="ApiUrlInvalid">必须是 https:// 开头的完整接口地址</string>
 </strings>
